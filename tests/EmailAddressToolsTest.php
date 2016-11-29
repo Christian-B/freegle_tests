@@ -7,52 +7,7 @@ class EmailAddressToolsTest extends PHPUnit_Framework_TestCase
 {
     //email_error tests
 
-    public function testCorrect()
-    {
-        $this->assertFalse(\freegle\EmailAddressTools\email_error("member1@yahoo.co.uk"));
-    }
 
-    public function testNoAt()
-    {
-        $this->assertEquals(\freegle\EmailAddressTools\NO_AT, \freegle\EmailAddressTools\email_error("member1yahoo.co.uk"));
-    }
-
-    public function testMultipleAt()
-    {
-        $this->assertStringMatchesFormat('%s 3 %s', \freegle\EmailAddressTools\email_error("member1@@yahoo@.co.uk"));
-    }
-
-    public function testNoDot()
-    {
-        $this->assertEquals(\freegle\EmailAddressTools\NO_DOT_IN_DOMAIN, \freegle\EmailAddressTools\email_error("member1@yahoocouk"));
-    }
-
-    public function testStartTab()
-    {
-        $this->assertEquals(\freegle\EmailAddressTools\START_WHITE_SPACE, \freegle\EmailAddressTools\email_error("\tmember1@yahoo.co.uk"));
-    }
-
-    public function testEndSpace()
-    {
-        $this->assertEquals(\freegle\EmailAddressTools\END_WHITE_SPACE , \freegle\EmailAddressTools\email_error("member1@yahoo.co.uk "));
-    }
-
-    public function testOtherError()
-    {
-        $this->assertEquals(\freegle\EmailAddressTools\OTHER_ERROR, \freegle\EmailAddressTools\email_error("member1@ya&oo.co.uk"));
-    }
-
-    //Top Level tests
-
-    public function testTopLevelCoUK()
-    {
-        $this->assertEquals(\freegle\UrlTopLevel\UK_COMMERCIAL, \freegle\EmailAddressTools\emailTopLevel("member1@yahoo.co.uk"));
-    }
-
-    public function testTopLevelCom()
-    {
-        $this->assertEquals(\freegle\UrlTopLevel\COMMERCIAL, \freegle\EmailAddressTools\emailTopLevel("member1@yahoo.com"));
-    }
 
     public function testTopLevelBad()
     {

@@ -11,16 +11,16 @@ CONST TOP_LEVEL_FILE = "data/topLevels.txt";
 const DOMAINS_DATA_FILES ="data/domains.csv";
 const COMMON_DOMAINS_COUNT_FILE = "data/CommonDomains.php";
 const VERY_COMMON_DOMAINS_COUNT_FILE = "data/VeryCommonDomains.php";
+const TOP_LEVEL_EXTRA_FILE = "TopLevelExtra.php";
+const TOP_LEVEL_EXTRA_COUNT_FILE = "data/TopLevelExtra.php";
 
+#Code files created
 const COMMON_DOMAINS_FILE = "CommonDomains.php";
 const VERY_COMMON_DOMAINS_FILE = "VeryCommonDomains.php";
 
 const COMMON_MINIMUM = 10;
 const VERY_COMMON_MINIMUM = 100;
 const DATA_DIVIDER = "  ";
-
-$domainCounts = array();
-$topLevelCounts = array();
 
 /**
  * @param $path string Path to he file
@@ -42,9 +42,7 @@ function openFile($path, $mode){
  *
  *
  */
-function grabDomain($email){
-    global $domainCounts;
-
+function grabDomain($email, $domainCounts){
     $parts = explode("@", strtolower(trim($email)));
     $parts_count = count($parts);
     if ($parts_count == 2){
@@ -59,18 +57,16 @@ function grabDomain($email){
     } else {
         echo "error:" . $email;
     }
+    return $domainCounts;
 }
 
-function showDomains(){
-    global $domainCounts;
-
+function showDomains($domainCounts){
     $myfile = openFile(DOMAINS_GROUPING_FILE, "a");
     foreach($domainCounts as $key => $value) {
         fwrite($myfile, $value . "  " . $key . "\n");
     }
     fwrite($myfile, "\n\n\n");
     fclose($myfile);
-    $domainCounts = array();
 }
 
 /**
@@ -79,6 +75,8 @@ function showDomains(){
  * Note: The same domain can appear more than once
  */
 function readEmails(){
+    $domainCounts  = array();
+
     $myfile = openFile(DOMAINS_GROUPING_FILE, "w");
     fclose($myfile);
 
@@ -86,20 +84,22 @@ function readEmails(){
     if ($handle) {
         $count = 0;
         while (($email = fgets($handle)) !== false) {
-            grabDomain($email);
+            $domainCounts =  grabDomain($email,$domainCounts);
             $count += 1;
             if ($count > 100000) {
-                showDomains();
+                echo $count . "\n";
+                showDomains($domainCounts);
+                $domainCounts = array();
                 $count = 0;
             }
         }
         fclose($handle);
-        showDomains();
+        showDomains($domainCounts);
     }
 }
 
-function grabTopLevel($line){
-    global $topLevelCounts;
+function grabTopLevel($line, $topLevelCounts)
+{
     $parts = explode("  ", trim($line));
     $parts_count = count($parts);
     if ($parts_count == 2){
@@ -112,20 +112,19 @@ function grabTopLevel($line){
         }
         $topLevelCounts[$topLevel] = $count;
     }
+    return $topLevelCounts;
 }
 
-function showTopLevels()
+function showTopLevels($topLevelCounts)
 {
-    global $topLevelCounts;
-
     echo "Writing top levels to " . TOP_LEVEL_FILE . "\n";
-
     arsort($topLevelCounts);
 
     $myfile = openFile (TOP_LEVEL_FILE, "w");
+
     foreach($topLevelCounts as $key => $value) {
-        fwrite($myfile, $value . DATA_DIVIDER . $key . DATA_DIVIDER . \freegle\DomainChecker\findTopLevelName($key) ."\n");
-        #echo $value . TOP_LEVEL_DIVIDER . $key . TOP_LEVEL_DIVIDER . \freegle\DomainChecker\findTopLevelName($key) . "\n";
+        $checker = new \freegle\DomainChecker\DomainChecker($key);
+        fwrite($myfile, $value . DATA_DIVIDER . $key . DATA_DIVIDER . $checker->getOrignalTopLevelName() ."\n");
     }
     fwrite($myfile, "\n\n\n");
     fclose($myfile);
@@ -134,18 +133,21 @@ function showTopLevels()
 
 function countTopLevels(){
     echo "Finding top level counts\n";
+    $topLevelCounts = array();
+
     $handle = fopen(DOMAINS_GROUPING_FILE, "r");
     if ($handle) {
         $count = 0;
         while (($line = fgets($handle)) !== false) {
-            grabTopLevel($line);
+            $topLevelCounts = grabTopLevel($line, $topLevelCounts);
             $count+=1;
             if ($count % 100000 == 0){
                 echo $count . " lines read \n";
             }
         }
         fclose($handle);
-        showTopLevels();
+        showTopLevels($topLevelCounts);
+        $topLevelCounts = array();
     }
 }
 
@@ -153,6 +155,10 @@ function arrayFileHeader($path, $array_name){
     $file = openFile($path, "w");
     fwrite($file, "<?php\n\n");
     fwrite($file, "namespace freegle\\" . substr($path, 0, -4) . ";\n\n");
+    fwrite($file, "/*\n");
+    fwrite($file, " *Automatically generated file.\n");
+    fwrite($file, " *Generated using DataCreator.php\n");
+    fwrite($file, " */\n\n");
     fwrite($file, "const " . $array_name . " = array(\n");
     fclose($file);
 }
@@ -181,9 +187,7 @@ function tailsForLevelDomains(){
     arrayFileTail(VERY_COMMON_DOMAINS_COUNT_FILE, "DOMAINS");
 }
 
-function grabDomainLine($line, $topLevel){
-    global $domainCounts;
-
+function grabDomainLine($line, $topLevel, $domainCounts){
     $parts = explode(DATA_DIVIDER, trim($line));
     $parts_count = count($parts);
     if ($parts_count == 2){
@@ -195,15 +199,12 @@ function grabDomainLine($line, $topLevel){
                 $count += $domainCounts[$domain];
             }
             $domainCounts[$domain] = $count;
-            return 1;
         }
     }
-    return 0;
+    return $domainCounts;
 }
 
-function saveTopLevelDomains($topLevel){
-    global $domainCounts;
-
+function saveTopLevelDomains($topLevel, $domainCounts){
     $csvFile = openFile(DOMAINS_DATA_FILES, "a");
     foreach($domainCounts as $key => $value) {
         fwrite($csvFile, $value . ",  " . $key . "\n");
@@ -211,10 +212,7 @@ function saveTopLevelDomains($topLevel){
     fclose($csvFile);
 }
 
-function createDomainScripts($topLevel){
-    global $domainCounts;
-
-    arsort($domainCounts);
+function createDomainScripts($topLevel, $domainCounts){
     $opened = false;
 
     $commonFile = openFile(COMMON_DOMAINS_FILE, "a");
@@ -247,29 +245,20 @@ function createDomainScripts($topLevel){
     fclose($commonCountFile);
     fclose($veryCommonFile);
     fclose($veryCommonCountFile);
-
-    $domainCounts = array();
 }
 
 function readTopLevel($topLevel, $topLevelName){
-    global $domainCounts;
-    $domainCount = array();
-    $count = 0;
-
+    $domainCounts = array();
     $handle = fopen(DOMAINS_GROUPING_FILE, "r");
     if ($handle) {
         while (($line = fgets($handle)) !== false) {
-            $count+=grabDomainLine($line, $topLevel);
-            if ($count % 1000 == 0){
-                echo $count . " lines added.\n";
-                $count+=1;
-            }
+            $domainCounts = grabDomainLine($line, $topLevel, $domainCounts);
         }
         fclose($handle);
         arsort($domainCounts);
-        saveTopLevelDomains($topLevel);
+        saveTopLevelDomains($topLevel, $domainCounts);
         if ($topLevelName != \freegle\DomainChecker\UNKNOW) {
-            createDomainScripts($topLevel);
+            createDomainScripts($topLevel, $domainCounts);
         } else {
             echo $topLevel . " unexpected so not adding to scripts\n";
         }
@@ -296,6 +285,196 @@ function createDomainFiles(){
     tailsForLevelDomains();
 }
 
+function countDomainsPerTopLevel()
+{
+    $handle = fopen(DOMAINS_DATA_FILES, "r");
+    if ($handle) {
+        $topLevel = "";
+        $count = 0;
+        while (($line = fgets($handle)) !== false) {
+            $info = explode(",  ", trim($line));
+            $info_count = count($info);
+            if ($info_count != 2) {
+                #echo $line;
+            } else {
+                $domain = $info[1];
+                $checker = new \freegle\DomainChecker\DomainChecker($domain);
+                if ($topLevel == $checker->getOrignalTopLevel()) {
+                    $count += 1;
+                } else {
+                    echo $topLevel . ": " . $count . "\n";
+                    $count = 1;
+                    $topLevel = $checker->getOrignalTopLevel();
+                }
+            }
+        }
+    }
+}
+
+function countParts($line, $partsCounts){
+    $info = explode(",  ", trim($line));
+    $info_count = count($info);
+    if ($info_count != 2) {
+         return;
+    }
+    $domain = $info[1];
+    $parts = explode(".", trim($domain));
+    $count = count($parts);
+    if (array_key_exists($count, $partsCounts)) {
+        $partsCounts[$count] = $partsCounts[$count] + 1;
+    } else {
+        $partsCounts[$count] = 1;
+    }
+    return $partsCounts;
+}
+
+function findExtraDepth($partsCounts){
+    $depth = 0;
+    $depthCount = 0;
+    foreach($partsCounts as $key => $count) {
+        if ($count > $depthCount){
+            $depthCount = $count;
+            $depth = $key;
+        }
+    }
+    return $depth + 1;
+}
+
+
+function findExtraDepths()
+{
+    echo "Finding Extra Depths\n";
+    $extraDepths = array();
+    $handle = fopen(DOMAINS_DATA_FILES, "r");
+    if ($handle) {
+        $topLevel = "";
+        $partsCounts = array();
+        while (($line = fgets($handle)) !== false) {
+            $info = explode(",  ", trim($line));
+            $info_count = count($info);
+            if ($info_count == 2) {
+                $domain = $info[1];
+                $checker = new \freegle\DomainChecker\DomainChecker($domain);
+                if ($topLevel != $checker->getOrignalTopLevel()) {
+                    if ($topLevel!=""){
+                        $extraDepth = findExtraDepth($partsCounts);
+                        if (array_key_exists ($extraDepth, $partsCounts)){
+                            if ($partsCounts[$extraDepth] >= COMMON_MINIMUM) {
+                                $extraDepths[$topLevel] = $extraDepth;
+                            }
+                        }
+                    }
+                    $partsCounts = array();
+                    $topLevel = $checker->getOrignalTopLevel();
+                }
+                $partsCounts = countParts($line, $partsCounts);
+            }
+        }
+    }
+    return $extraDepths;
+}
+
+function findExtra($domain, $extraDepth, $extras){
+    $parts = explode(".", trim($domain));
+    $count = count($parts);
+    if ($count == $extraDepth) {
+        if (array_key_exists ($parts[1] , $extras )) {
+            $domains = $extras[$parts[1]];
+        } else {
+            $domains = array();
+        }
+        $domains[] = $domain;
+        $extras[$parts[1]] = $domains;
+    }
+    return $extras;
+}
+
+
+function headersForExtra(){
+    arrayFileHeader(TOP_LEVEL_EXTRA_FILE, "DOMAINS");
+    arrayFileHeader(TOP_LEVEL_EXTRA_COUNT_FILE, "DOMAINS");
+}
+
+function tailsForExtra(){
+    arrayFileTail(TOP_LEVEL_EXTRA_FILE, "DOMAINS");
+    arrayFileTail(TOP_LEVEL_EXTRA_COUNT_FILE, "DOMAINS");
+}
+
+function recordExtras($topLevel, $extras)
+{
+    $opened = false;
+    foreach($extras as $key => $domains) {
+        if (count($domains) >= COMMON_MINIMUM) {
+            if (! $opened){
+                $extraFile = openFile(TOP_LEVEL_EXTRA_FILE, "a");
+                $extraCountFile = openFile(TOP_LEVEL_EXTRA_COUNT_FILE, "a");
+                fwrite($extraFile, "\t\"" . $topLevel . "\" => array (\n");
+                fwrite($extraCountFile, "\t\"" . $topLevel . "\" => array (\n");
+            }
+            $opened = true;
+            fwrite($extraFile, "\t\t\"" . $key . "." . $topLevel . "\",\n");
+            fwrite($extraCountFile, "\t\t\"" . $key . "." . $topLevel . "\", #" . count($domains)  . "\n");
+            echo $key . "." . $topLevel . "  " . count($domains) . "\n";
+        }
+    }
+    if ($opened) {
+        fwrite($extraFile, "\t),\n");
+        fwrite($extraCountFile, "\t),\n");
+        fclose($extraFile);
+        fclose($extraCountFile);
+    }
+    return $opened;
+}
+
+function recordExtrasDepths($extrasdepths, $path)
+{
+    $file = openFile($path, "a");
+    fwrite($file, "\nconst EXTRA_DEPTHS = array(\n");
+    foreach($extrasdepths as $key => $depth) {
+        fwrite($file, "\t\"" . $key . "\"=>" . $depth . ",\n");
+    }
+    fwrite($file, ");\n");
+    fclose($file);
+}
+
+function findAllExtras()
+{
+    $extraDepths = findExtraDepths();
+
+    headersForExtra();
+    $doCheck = false;
+    $extras = array();
+    $handle = fopen(DOMAINS_DATA_FILES, "r");
+    if ($handle) {
+        $topLevel = "";
+        while (($line = fgets($handle)) !== false) {
+            $info = explode(",  ", trim($line));
+            $info_count = count($info);
+            if ($info_count == 2) {
+                $domain = $info[1];
+                $checker = new \freegle\DomainChecker\DomainChecker($domain);
+                if ($topLevel != $checker->getOrignalTopLevel()) {
+                    if ($doCheck) {
+                        if (! recordExtras($topLevel, $extras)) {
+                            unset($extraDepths[$topLevel]);
+                        }
+                    }
+                    $topLevel = $checker->getOrignalTopLevel();
+                    $doCheck = array_key_exists ($topLevel, $extraDepths);
+                    $extras = array();
+                }
+                if ($doCheck){
+                    $extras = findExtra($domain, $extraDepths[$topLevel], $extras);
+                }
+            }
+        }
+    }
+    tailsForExtra();
+    recordExtrasDepths($extraDepths, TOP_LEVEL_EXTRA_FILE);
+    recordExtrasDepths($extraDepths, TOP_LEVEL_EXTRA_COUNT_FILE);
+}
+
 #readEmails();
 #countTopLevels();
-createDomainFiles();
+#createDomainFiles();
+findAllExtras();

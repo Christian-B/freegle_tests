@@ -2,6 +2,14 @@
 
 namespace freegle\VeryCommonDomains;
 
+/*
+");
+    fwrite(Resource id #12, " *Automatically generated file.
+");
+    fwrite(Resource id #12, " *Generated using DataCreator.php
+");
+    fwrite(Resource id #12, " */
+
 const DOMAINS = array(
 	"user.trashnothing.com",
 	"yahoo.com",
@@ -69,17 +77,17 @@ const DOMAINS = array(
 	"woh.rr.com",
 	"bt.com",
 	"myway.com",
-	"austin.rr.com",
 	"frontier.com",
+	"austin.rr.com",
 	"wideopenwest.com",
 	"hathway.com",
-	"wowway.com",
 	"indosatooredoo.com",
+	"wowway.com",
 	"triad.rr.com",
-	"satx.rr.com",
 	"ovi.com",
-	"rediffmail.com",
+	"satx.rr.com",
 	"buckeye-express.com",
+	"rediffmail.com",
 	"direct.ilovefreegle.org",
 	"users.ilovefreegle.org",
 	"modtools.org",
@@ -101,8 +109,8 @@ const DOMAINS = array(
 	"tinyworld.co.uk",
 	"zen.co.uk",
 	"lycos.co.uk",
-	"clara.co.uk",
 	"totalise.co.uk",
+	"clara.co.uk",
 	"globalnet.co.uk",
 	"talktalk.net",
 	"comcast.net",
@@ -127,9 +135,9 @@ const DOMAINS = array(
 	"netzero.net",
 	"ripe.net",
 	"gmx.net",
-	"mayatama.net",
 	"triolan.net",
 	"soborka.net",
+	"mayatama.net",
 	"nhs.net",
 	"prodigy.net",
 	"stcable.net",
@@ -144,10 +152,10 @@ const DOMAINS = array(
 	"windstream.net",
 	"az-ix.net",
 	"ukgateway.net",
-	"artelecom.net",
 	"uk2.net",
-	"iusacell.net",
+	"artelecom.net",
 	"bezeqint.net",
+	"iusacell.net",
 	"ameritech.net",
 	"webtv.net",
 	"pacbell.net",
@@ -164,10 +172,8 @@ const DOMAINS = array(
 	"republisher.freegle.in",
 	"bsnl.in",
 	"airtelbroadband.in",
-	"yahoo.co.in",
-	"yahoo.in",
 	"sitibroadband.in",
-	"vsnl.net.in",
+	"yahoo.in",
 	"actcorp.in",
 	"mtsindia.in",
 	"irinn.in",
@@ -231,6 +237,7 @@ const DOMAINS = array(
 	"yahoo.com.ar",
 	"speedy.com.ar",
 	"telecentro-reversos.com.ar",
+	"yahoo.co.in",
 	"artelecom.ro",
 	"rdsnet.ro",
 	"upc.ro",
@@ -253,8 +260,9 @@ const DOMAINS = array(
 	"ucom.am",
 	"beeline.am",
 	"yahoo.co.nz",
-	"yahoo.com.cn",
+	"vsnl.net.in",
 	"fastmail.fm",
+	"yahoo.com.cn",
 	"ttnet.com.tr",
 	"phonecoop.coop",
 	"yahoo.gr",

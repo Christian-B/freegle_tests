@@ -20,8 +20,27 @@ class DomainChecker
     {
         $parts = explode(".", $domain);
         $count = count($parts);
-        if ($parts[$count-1] == "uk"){
-            return $parts[$count-2] . "." . $parts[$count-1];
+        switch ($parts[$count-1]){
+            case "uk":
+                return $parts[$count-2] . "." . $parts[$count-1];
+            case "in":
+                switch ($parts[$count-2]) {
+                    case "co":
+                        return "co.in";
+                    case "gov":
+                        return "net.in";
+                    case "net":
+                        return "net.in";
+                }
+            case "pl":
+                switch ($parts[$count-2]) {
+                    case "com":
+                        return "com.pl";
+                    case "edu":
+                        return "edu.pl";
+                    case "net":
+                        return "net.pl";
+                }
         }
         return $parts[$count-1];
     }

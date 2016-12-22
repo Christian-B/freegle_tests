@@ -6,6 +6,7 @@ require_once("CommonDomains.php");
 require_once("DamerauLevenshtein.php");
 require_once("DomainChecker.php");
 require_once("VeryCommonDomains.php");
+require_once("TopLevelExtra.php");
 
 class DomainRecommender extends \freegle\DomainChecker\DomainChecker
 {
@@ -16,60 +17,42 @@ class DomainRecommender extends \freegle\DomainChecker\DomainChecker
     function recommendedDomain($domain, $tolerance)
     {
         $topLevel = $this->getOrignalTopLevel();
-        switch ($topLevel) {
-            case "ac.uk":
-                $list = \freegle\CommonDomains\DOMAINS[$topLevel];
-                $recommended = $this->recommendedDomainFromList($domain, $list, $tolerance);
+        if (array_key_exists ($topLevel , \freegle\CommonDomains\DOMAINS )) {
+            $list = \freegle\CommonDomains\DOMAINS[$topLevel];
+            $recommended = $this->recommendedDomainFromList($domain, $list, $tolerance);
+            if ($recommended != false) {
+                return $recommended;
+            }
+        }
+        if (array_key_exists ($topLevel , \freegle\TopLevelExtra\EXTRA_DEPTHS )) {
+            $parts = explode(".", $domain);
+            $count = count($parts);
+            if ($count == \freegle\TopLevelExtra\EXTRA_DEPTHS[$topLevel]) {
+                $list = \freegle\TopLevelExtra\DOMAINS[$topLevel];
+                $recommended = $this->recommendWithExtra($parts, $list, $tolerance);
                 if ($recommended != false){
                     return $recommended;
                 }
-                $recommended = $this->acUkRecommendation($domain, $tolerance);
-                break;
-            case \freegle\DomainChecker\UNKNOW:
-                break;
-            default:
-                if (array_key_exists ($topLevel , \freegle\CommonDomains\DOMAINS )) {
-                    $list = \freegle\CommonDomains\DOMAINS[$topLevel];
-                    $recommended = $this->recommendedDomainFromList($domain, $list, $tolerance);
-                } else {
-                    #Bad toplevel so don't check just check very common
-                    $recommended = false;
-                }
-        }
-        if ($recommended != false){
-            return $recommended;
+            }
         }
         $list = \freegle\VeryCommonDomains\DOMAINS;
         return $this->recommendedDomainFromList($domain, $list, $tolerance);
-
     }
 
-    function acUkRecommendation($domain, $tolerance)
+    function recommendWithExtra($parts, $list, $tolerance)
     {
-        $parts = explode(".", $domain);
-        $count = count($parts);
-        if ($count == 3){
-            return $this->recommendedDomainFromList($domain, \freegle\UrlTopLevel\AC_UK_THIRD, $tolerance);
-        } elseif  ($count < 3) {
-            //$domain is exactly ac.uk so match is impossible
+        $partDomain = $parts[1];
+        for ($i = 2; $i < count($parts); $i++) {
+            $partDomain = $partDomain . "." . $parts[$i];
+        }
+        $partRecommend = $this->recommendedDomainFromList($partDomain, $list, $tolerance);
+        if ($partRecommend == false){
             return false;
         } else {
-            //Many uni have sub domains like  @cs.man.ac.uk
-            //So check the last three biits and assume the first is correct
-            $lastThree = $parts[$count-3] . "." . $parts[$count-2] . "." . $parts[$count-1];
-            $recommended = $this->recommendedDomainFromList($lastThree, \freegle\UrlTopLevel\AC_UK_THIRD, $tolerance);
-            //now add the first bits back in
-            if ($recommended == $lastThree){
-                $recommnded = $domain;
-            } elseif ($recommended != false){
-                for ($i = 0; $i < $count -3; $i++) {
-                    echo $i . $parts[$i] . "<br>";
-                    $recommended = $parts[$i] . "." .  $recommended;
-                }
-            }
-            return $recommended;
+            return $parts[0] . "." .  $partRecommend;
         }
     }
+
 
     function recommendedDomainFromList($domain, $list, $tolerance)
     {

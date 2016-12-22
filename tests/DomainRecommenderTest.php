@@ -38,14 +38,14 @@ class DomainRecommenderTest extends PHPUnit_Framework_TestCase {
         $this->verifyChecker("yahoo.co.u", "u", \freegle\DomainChecker\UNKNOW, "yahoo.co.uk");
     }
 
-    public function testManchestoorAcUk()
+    public function testMancheesterAcUk()
     {
-        $this->verifyChecker("manchestoor.ac.uk", "ac.uk", \freegle\UrlTopLevel\UK_ACADEMIC, "manchester.ac.uk");
+        $this->verifyChecker("mancheester.ac.uk", "ac.uk", \freegle\UrlTopLevel\UK_ACADEMIC, "manchester.ac.uk");
     }
 
-    public function testCsManchestoorAcUk()
+    public function testExtraOxfrdAcUk()
     {
-        $this->verifyChecker("cs.manchestoor.ac.uk", "ac.uk", \freegle\UrlTopLevel\UK_ACADEMIC, "cs.manchester.ac.uk");
+        $this->verifyChecker("wolfson.oxfrd.ac.uk", "ac.uk", \freegle\UrlTopLevel\UK_ACADEMIC, "wolfson.oxford.ac.uk");
     }
 
     /*

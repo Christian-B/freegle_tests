@@ -4,12 +4,12 @@ require_once("DomainRecommender.php");
 
 class DomainRecommenderTest extends PHPUnit_Framework_TestCase {
 
-    public function verifyChecker($original_domain, $original_top_level, $original_top_level_name, $recommended_domain)
+    public function verifyChecker($original_domain, $top_level, $top_level_name, $recommended_domain)
     {
         $checker = new \freegle\DomainRecommender\DomainRecommender($original_domain);
         $this->assertEquals($original_domain, $checker->getOriginalDomain());
-        $this->assertEquals($original_top_level, $checker->getOrignalTopLevel());
-        $this->assertEquals($original_top_level_name, $checker->getOrignalTopLevelName());
+        $this->assertEquals($top_level, $checker->getTopLevel());
+        $this->assertEquals($top_level_name, $checker->getTopLevelName());
         $this->assertEquals($recommended_domain, $checker->getRecommendedDomain());
     }
 
@@ -23,7 +23,7 @@ class DomainRecommenderTest extends PHPUnit_Framework_TestCase {
         $this->verifyChecker("aal.com", "com", \freegle\UrlTopLevel\COMMERCIAL, "aol.com");
     }
 
-    public function testYahoobAD()
+    public function testYahooBad()
     {
         $this->verifyChecker("yahoo.bad", "bad", \freegle\DomainChecker\UNKNOW, "yahoo.ca");
     }
@@ -31,6 +31,16 @@ class DomainRecommenderTest extends PHPUnit_Framework_TestCase {
     public function testYapooCoUk()
     {
         $this->verifyChecker("yapoo.co.uk", "co.uk", \freegle\UrlTopLevel\UK_COMMERCIAL, "yahoo.co.uk");
+    }
+
+    public function testYapooCoUkCaps()
+    {
+        $this->verifyChecker("yaPoo.co.UK", "co.uk", \freegle\UrlTopLevel\UK_COMMERCIAL, "yahoo.co.uk");
+    }
+
+    public function testYapooCoUkWhiteSpace()
+    {
+        $this->verifyChecker("\tyapoo.co.uk ", "co.uk", \freegle\UrlTopLevel\UK_COMMERCIAL, "yahoo.co.uk");
     }
 
     public function testYahooCoU()

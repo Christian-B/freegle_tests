@@ -10,10 +10,14 @@ class DomainChecker
 {
     private $original_domain;
 
-    private $orininal_top_level;
+    private $top_level;
+
+    private $clean_domain;
 
     public function __construct($original_domain){
         $this->original_domain = $original_domain;
+        $trimmed = trim($original_domain);
+        $this->clean_domain = strtolower($trimmed);
     }
 
     private function findTopLevel($domain)
@@ -76,20 +80,28 @@ class DomainChecker
     /**
      * @return mixed
      */
-    public function getOrignalTopLevel()
+    public function getCleanDomain()
     {
-        if (!isset($this->orininal_top_level)){
-            $this->orininal_top_level = $this->findTopLevel($this->getOriginalDomain());
-        }
-        return $this->orininal_top_level;
+        return $this->clean_domain;
     }
 
     /**
      * @return mixed
      */
-    public function getOrignalTopLevelName()
+    public function getTopLevel()
     {
-        return $this->findTopLevelName($this->getOriginalDomain());
+        if (!isset($this->top_level)){
+            $this->top_level = $this->findTopLevel($this->getCleanDomain());
+        }
+        return $this->top_level;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTopLevelName()
+    {
+        return $this->findTopLevelName($this->getCleanDomain());
     }
 
 }

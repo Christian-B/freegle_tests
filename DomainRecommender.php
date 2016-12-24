@@ -8,68 +8,86 @@ require_once("DomainChecker.php");
 require_once("VeryCommonDomains.php");
 require_once("TopLevelExtra.php");
 
+const MAX_TOLERANCE = 3;
+
 class DomainRecommender extends \freegle\DomainChecker\DomainChecker
 {
     private $recommended_domain;
 
     private $all_recommendations;
 
-    function recommendedDomain($domain, $tolerance)
+    public function correct()
+    {
+        $topLevel = $this->getOrignalTopLevel();
+        if (array_key_exists($topLevel, \freegle\CommonDomains\DOMAINS)) {
+            $list = \freegle\CommonDomains\DOMAINS[$topLevel];
+            if (in_array($this->getOriginalDomain(), $list)) {
+                return true;
+            }
+        }
+    }
+
+    function allRecommendedDomains($domain, $tolerance)
     {
         $topLevel = $this->getOrignalTopLevel();
         if (array_key_exists ($topLevel , \freegle\CommonDomains\DOMAINS )) {
             $list = \freegle\CommonDomains\DOMAINS[$topLevel];
-            $recommended = $this->recommendedDomainFromList($domain, $list, $tolerance);
-            if ($recommended != false) {
-                return $recommended;
-            }
+            $recommendations = $this->allFromList($domain, $list, $tolerance);
+        } else {
+            $recommendations = array();
         }
         if (array_key_exists ($topLevel , \freegle\TopLevelExtra\EXTRA_DEPTHS )) {
             $parts = explode(".", $domain);
             $count = count($parts);
             if ($count == \freegle\TopLevelExtra\EXTRA_DEPTHS[$topLevel]) {
                 $list = \freegle\TopLevelExtra\DOMAINS[$topLevel];
-                $recommended = $this->recommendWithExtra($parts, $list, $tolerance);
-                if ($recommended != false){
-                    return $recommended;
-                }
+                $newRecommendations = $this->allWithExtra($parts, $list, $tolerance);
+                $recommendations = array_merge($recommendations, $newRecommendations);
             }
         }
         $list = \freegle\VeryCommonDomains\DOMAINS;
-        return $this->recommendedDomainFromList($domain, $list, $tolerance);
+        $newRecommendations = $this->allFromList($domain, $list, $tolerance);
+        $recommendations = array_merge($recommendations, $newRecommendations);
+        $ukTopLevel =  $topLevel . ".uk";
+        if (array_key_exists ($ukTopLevel , \freegle\CommonDomains\DOMAINS )) {
+            $list = \freegle\CommonDomains\DOMAINS[$ukTopLevel];
+            $newRecommendations = $this->allFromList($domain . ".uk", $list, $tolerance);
+            foreach($newRecommendations as $newRecommend => $difference) {
+
+                $recommendations[$newRecommend] = $difference + 1.5;
+            }
+        }
+        return $recommendations;
     }
 
-    function recommendWithExtra($parts, $list, $tolerance)
+    function allWithExtra($parts, $list, $tolerance)
     {
         $partDomain = $parts[1];
         for ($i = 2; $i < count($parts); $i++) {
             $partDomain = $partDomain . "." . $parts[$i];
         }
-        $partRecommend = $this->recommendedDomainFromList($partDomain, $list, $tolerance);
-        if ($partRecommend == false){
-            return false;
-        } else {
-            return $parts[0] . "." .  $partRecommend;
+        $partRecommends = $this->allFromList($partDomain, $list, $tolerance);
+        $recommendations = array();
+        foreach($partRecommends as $partRecommend => $difference) {
+            $recommendations[$parts[0] . "." .  $partRecommend] = $difference;
         }
+        return  $recommendations;
     }
 
-
-    function recommendedDomainFromList($domain, $list, $tolerance)
+    function allFromList($domain, $list, $tolerance)
     {
-        if (in_array($domain , $list)){
-            return $domain;
+        $recommendations = array();
+        if (in_array($domain, $list)) {
+            $recommendations[$domain] = 0;
         }
-        $bestFind = false;
-        $bestValue = $tolerance + 1;
-        foreach($list as $possible){
+        foreach ($list as $possible) {
             $checker = new \Oefenweb\DamerauLevenshtein\DamerauLevenshtein($domain, $possible);
-            $difference =  $checker->getSimilarity();
-            if ($difference < $bestValue){
-                $bestValue = $difference;
-                $bestFind = $possible;
+            $difference = $checker->getSimilarity();
+            if ($difference <= $tolerance) {
+                $recommendations[$possible] = $difference;
             }
         }
-        return $bestFind;
+        return $recommendations;
     }
 
     /**
@@ -78,7 +96,17 @@ class DomainRecommender extends \freegle\DomainChecker\DomainChecker
     public function getRecommendedDomain()
     {
         if (!isset($this->recommended_domain)) {
-            $this->recommended_domain = $this->recommendedDomain($this->getOriginalDomain(), 2);
+            if ($this->correct()){
+                $this->recommended_domain = $this->getOriginalDomain();
+            } else {
+                $min_difference = PHP_INT_MAX;
+                foreach($this->getAllRecommendations() as $recommendation => $difference){
+                     if ($difference < $min_difference){
+                        $this->recommended_domain = $recommendation;
+                        $min_difference = $difference;
+                    }
+                }
+            }
         }
         return $this->recommended_domain;
     }
@@ -88,6 +116,9 @@ class DomainRecommender extends \freegle\DomainChecker\DomainChecker
      */
     public function getAllRecommendations()
     {
+        if (!isset($this->all_recommendations)) {
+            $this->all_recommendations = $this->allRecommendedDomains($this->getOriginalDomain(), MAX_TOLERANCE);
+        }
         return $this->all_recommendations;
     }
 

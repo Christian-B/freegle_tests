@@ -72,6 +72,7 @@ class EmailChecker
             return false;
         }
     }
+
     /**
      * Returns the email as originally supplied
      *

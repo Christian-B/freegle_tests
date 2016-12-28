@@ -16,7 +16,7 @@ class DomainRecommender extends \freegle\DomainChecker\DomainChecker
 
     private $all_recommendations;
 
-    public function correct()
+    public function isKnown()
     {
         $topLevel = $this->getTopLevel();
         if (array_key_exists($topLevel, \freegle\CommonDomains\DOMAINS)) {
@@ -96,10 +96,11 @@ class DomainRecommender extends \freegle\DomainChecker\DomainChecker
     public function getRecommendedDomain()
     {
         if (!isset($this->recommended_domain)) {
-            if ($this->correct()){
+            if ($this->isKnown()){
                 $this->recommended_domain = $this->getCleanDomain();
             } else {
                 $min_difference = PHP_INT_MAX;
+                $this->recommended_domain = false; #false if none found
                 foreach($this->getAllRecommendations() as $recommendation => $difference){
                      if ($difference < $min_difference){
                         $this->recommended_domain = $recommendation;

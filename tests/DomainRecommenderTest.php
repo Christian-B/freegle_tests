@@ -2,60 +2,72 @@
 
 require_once("DomainRecommender.php");
 
-class DomainRecommenderTest extends PHPUnit_Framework_TestCase {
+class DomainRecommenderTest extends PHPUnit_Framework_TestCase
+{
 
-    public function verifyChecker($original_domain, $top_level, $top_level_name, $recommended_domain)
+    public function verifyChecker($original_domain, $known, $recommended_domain)
     {
         $checker = new \freegle\DomainRecommender\DomainRecommender($original_domain);
-        $this->assertEquals($original_domain, $checker->getOriginalDomain());
-        $this->assertEquals($top_level, $checker->getTopLevel());
-        $this->assertEquals($top_level_name, $checker->getTopLevelName());
+        $this->assertEquals($known, $checker->isKnown());
         $this->assertEquals($recommended_domain, $checker->getRecommendedDomain());
+    }
+
+    public function testParent()
+    {
+        $checker = new \freegle\DomainRecommender\DomainRecommender("yahoo.co.uk");
+        $this->assertEquals("yahoo.co.uk", $checker->getOriginalDomain());
+        $this->assertEquals("co.uk", $checker->getTopLevel());
+        $this->assertEquals(\freegle\UrlTopLevel\UK_COMMERCIAL, $checker->getTopLevelName());
     }
 
     public function testYahooCoUk()
     {
-        $this->verifyChecker("yahoo.co.uk", "co.uk", \freegle\UrlTopLevel\UK_COMMERCIAL, "yahoo.co.uk");
+        $this->verifyChecker("yahoo.co.uk" , true, "yahoo.co.uk");
     }
 
     public function testAalCom()
     {
-        $this->verifyChecker("aal.com", "com", \freegle\UrlTopLevel\COMMERCIAL, "aol.com");
+        $this->verifyChecker("aal.com", false, "aol.com");
     }
 
     public function testYahooBad()
     {
-        $this->verifyChecker("yahoo.bad", "bad", \freegle\DomainChecker\UNKNOW, "yahoo.ca");
+        $this->verifyChecker("yahoo.bad", false,  "yahoo.ca");
     }
 
     public function testYapooCoUk()
     {
-        $this->verifyChecker("yapoo.co.uk", "co.uk", \freegle\UrlTopLevel\UK_COMMERCIAL, "yahoo.co.uk");
+        $this->verifyChecker("yapoo.co.uk", false, "yahoo.co.uk");
     }
 
     public function testYapooCoUkCaps()
     {
-        $this->verifyChecker("yaPoo.co.UK", "co.uk", \freegle\UrlTopLevel\UK_COMMERCIAL, "yahoo.co.uk");
+        $this->verifyChecker("yaPoo.co.UK", false, "yahoo.co.uk");
     }
 
     public function testYapooCoUkWhiteSpace()
     {
-        $this->verifyChecker("\tyapoo.co.uk ", "co.uk", \freegle\UrlTopLevel\UK_COMMERCIAL, "yahoo.co.uk");
+        $this->verifyChecker("\tyapoo.co.uk ", false,  "yahoo.co.uk");
     }
 
     public function testYahooCoU()
     {
-        $this->verifyChecker("yahoo.co.u", "u", \freegle\DomainChecker\UNKNOW, "yahoo.co.uk");
+        $this->verifyChecker("yahoo.co.u", false,  "yahoo.co.uk");
     }
 
     public function testMancheesterAcUk()
     {
-        $this->verifyChecker("mancheester.ac.uk", "ac.uk", \freegle\UrlTopLevel\UK_ACADEMIC, "manchester.ac.uk");
+        $this->verifyChecker("mancheester.ac.uk",  false, "manchester.ac.uk");
     }
 
     public function testExtraOxfrdAcUk()
     {
-        $this->verifyChecker("wolfson.oxfrd.ac.uk", "ac.uk", \freegle\UrlTopLevel\UK_ACADEMIC, "wolfson.oxford.ac.uk");
+        $this->verifyChecker("wolfson.oxfrd.ac.uk",  false, "wolfson.oxford.ac.uk");
+    }
+
+    public function testBad()
+    {
+        $this->verifyChecker("thisDomainisNotKnown.co.uk", false,  false);
     }
 
     /*

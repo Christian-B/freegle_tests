@@ -8,19 +8,17 @@ const UNKNOW = "unknown"; #keep as one word for scripts
 
 class DomainChecker
 {
-    private $original_domain;
+    protected $original_domain;
 
-    private $top_level;
+    protected $lowerCaseDoamin;
 
-    private $clean_domain;
-
-    public function __construct($original_domain){
+     public function __construct($original_domain){
         $this->original_domain = $original_domain;
-        $trimmed = trim($original_domain);
-        $this->clean_domain = strtolower($trimmed);
+        $this->lowerCaseDoamin = strtolower($original_domain);
+        $this->top_level = $this->findTopLevel($this->lowerCaseDoamin);
     }
 
-    private function findTopLevel($domain)
+    protected function findTopLevel($domain)
     {
         $parts = explode(".", $domain);
         $count = count($parts);
@@ -49,9 +47,28 @@ class DomainChecker
         return $parts[$count-1];
     }
 
-    private function findTopLevelName($domain)
+    /**
+    * @return mixed
+    */
+    public function getOriginalDomain()
     {
-        $parts = explode(".", $domain);
+       return $this->original_domain;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTopLevel()
+    {
+        return $this->top_level;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTopLevelName()
+    {
+        $parts = explode(".", $this->lowerCaseDoamin);
         $count = count($parts);
         if (array_key_exists($parts[$count-1], \freegle\UrlTopLevel\DEFAULT_DOMAINS)){
             return \freegle\UrlTopLevel\DEFAULT_DOMAINS[$parts[$count-1]];
@@ -67,41 +84,6 @@ class DomainChecker
             return \freegle\UrlTopLevel\COUNTRY_CODES[$parts[$count-1]];
         }
         return UNKNOW;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getOriginalDomain()
-    {
-       return $this->original_domain;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCleanDomain()
-    {
-        return $this->clean_domain;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTopLevel()
-    {
-        if (!isset($this->top_level)){
-            $this->top_level = $this->findTopLevel($this->getCleanDomain());
-        }
-        return $this->top_level;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTopLevelName()
-    {
-        return $this->findTopLevelName($this->getCleanDomain());
     }
 
 }

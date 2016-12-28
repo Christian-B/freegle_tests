@@ -24,6 +24,7 @@ class EmailRecommender extends \freegle\EmailChecker\EmailChecker
          } else {
             $this->domainRecommendor = false;
             $this->localPart = false;
+            echo $this-> getCleanEmail() . "\n";
         }
      }
 

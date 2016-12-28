@@ -21,15 +21,16 @@ class DomainRecommender extends \freegle\DomainChecker\DomainChecker
         $topLevel = $this->getTopLevel();
         if (array_key_exists($topLevel, \freegle\CommonDomains\DOMAINS)) {
             $list = \freegle\CommonDomains\DOMAINS[$topLevel];
-            if (in_array($this->getCleanDomain(), $list)) {
+            if (in_array($this->lowerCaseDoamin, $list)) {
                 return true;
             }
         }
+        return false;
     }
 
-    function allRecommendedDomains($domain, $tolerance)
+    function findAllRecommendedDomains($domain, $tolerance)
     {
-        $topLevel = $this->getTopLevel();
+        $topLevel = $this->findTopLevel($domain);
         if (array_key_exists ($topLevel , \freegle\CommonDomains\DOMAINS )) {
             $list = \freegle\CommonDomains\DOMAINS[$topLevel];
             $recommendations = $this->allFromList($domain, $list, $tolerance);
@@ -97,7 +98,7 @@ class DomainRecommender extends \freegle\DomainChecker\DomainChecker
     {
         if (!isset($this->recommended_domain)) {
             if ($this->isKnown()){
-                $this->recommended_domain = $this->getCleanDomain();
+                $this->recommended_domain = $this->original_domain;
             } else {
                 $min_difference = PHP_INT_MAX;
                 $this->recommended_domain = false; #false if none found
@@ -118,7 +119,7 @@ class DomainRecommender extends \freegle\DomainChecker\DomainChecker
     public function getAllRecommendations()
     {
         if (!isset($this->all_recommendations)) {
-            $this->all_recommendations = $this->allRecommendedDomains($this->getCleanDomain(), MAX_TOLERANCE);
+            $this->all_recommendations = $this->findAllRecommendedDomains(trim($this->lowerCaseDoamin), MAX_TOLERANCE);
         }
         return $this->all_recommendations;
     }

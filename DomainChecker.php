@@ -8,15 +8,14 @@ const UNKNOW = "unknown"; #keep as one word for scripts
 
 class DomainChecker
 {
-    protected $original_domain;
+    protected $originalDomain;
 
     protected $lowerCaseDoamin;
 
-     public function __construct($original_domain){
-        $this->original_domain = $original_domain;
-        $this->lowerCaseDoamin = strtolower($original_domain);
-        $this->top_level = $this->findTopLevel($this->lowerCaseDoamin);
-    }
+    public function __construct($originalDomain){
+        $this->originalDomain = $originalDomain;
+        $this->lowerCaseDoamin = strtolower($originalDomain);
+   }
 
     protected function findTopLevel($domain)
     {
@@ -52,7 +51,7 @@ class DomainChecker
     */
     public function getOriginalDomain()
     {
-       return $this->original_domain;
+       return $this->originalDomain;
     }
 
     /**
@@ -60,7 +59,7 @@ class DomainChecker
      */
     public function getTopLevel()
     {
-        return $this->top_level;
+        return $this->findTopLevel($this->lowerCaseDoamin);
     }
 
     /**
@@ -74,9 +73,9 @@ class DomainChecker
             return \freegle\UrlTopLevel\DEFAULT_DOMAINS[$parts[$count-1]];
         }
         if ($parts[$count-1] == "uk"){
-            $top_level = $parts[$count-2] . "." . $parts[$count-1];
-            if (array_key_exists($top_level, \freegle\UrlTopLevel\UK_SECOND_LEVEL)){
-                return \freegle\UrlTopLevel\UK_SECOND_LEVEL[$top_level];
+            $topLevel = $parts[$count-2] . "." . $parts[$count-1];
+            if (array_key_exists($topLevel, \freegle\UrlTopLevel\UK_SECOND_LEVEL)){
+                return \freegle\UrlTopLevel\UK_SECOND_LEVEL[$topLevel];
             }
             return UNKNOW;
         }

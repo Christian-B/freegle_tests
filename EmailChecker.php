@@ -18,36 +18,36 @@ class EmailChecker
      *
      * @var String
      */
-    private $original_email;
+    private $originalEmail;
 
     /**
      * Email after cleaning but before converting to a recommended one.
      *
      * @var String
      */
-    private $clean_email;
+    private $cleanEmail;
 
-    private $orignal_error;
+    private $orignalError;
 
-    private $clean_error;
+    private $cleanError;
 
     /**
      * EmailChecker constructor.
-     * @param String $original_email
+     * @param String $originalEmail
      */
-    public function __construct($original_email){
-        $this->original_email = $original_email;
-        $this->clean_email =  $this->cleanEmail($original_email);
+    public function __construct($originalEmail){
+        $this->originalEmail = $originalEmail;
+        $this->cleanEmail =  $this->cleanEmail($originalEmail);
     }
 
     private function cleanEmail($email)
     {
         $trimmed = trim($email);
-        $lower_case = strtolower($trimmed);
-        return $lower_case;
+        $lowerCase = strtolower($trimmed);
+        return $lowerCase;
     }
 
-    function email_error($email)
+    private function emailError($email)
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $count = substr_count($email, "@");
@@ -80,7 +80,7 @@ class EmailChecker
      */
     public function getOriginalEmail()
     {
-        return $this->original_email;
+        return $this->originalEmail;
     }
 
     /**
@@ -90,22 +90,22 @@ class EmailChecker
      */
     public function getCleanEmail()
     {
-        return $this->clean_email;
+        return $this->cleanEmail;
     }
 
     public function getOriginalError()
     {
-        if (!isset($this->orignal_error)){
-            $this->orignal_error = $this->email_error($this->getOriginalEmail());
+        if (!isset($this->orignalError)){
+            $this->orignalError = $this->emailError($this->getOriginalEmail());
         }
-        return $this->orignal_error;
+        return $this->orignalError;
     }
 
     public function getCleanError()
     {
-        if (!isset($this->clean_error)){
-            $this->clean_error = $this->email_error($this->getCleanEmail());
+        if (!isset($this->cleanError)){
+            $this->cleanError = $this->emailError($this->getCleanEmail());
         }
-        return $this->clean_error;
+        return $this->cleanError;
     }
 }

@@ -15,8 +15,8 @@ class EmailRecommender extends \freegle\EmailChecker\EmailChecker
 
     private $localPart;
 
-    public function __construct($original_email){
-        parent::__construct($original_email);
+    public function __construct($originalEmail){
+        parent::__construct($originalEmail);
         $parts = explode("@", $this-> getCleanEmail());
         if (count($parts) == 2){
             $this->domainRecommendor = new \freegle\DomainRecommender\DomainRecommender($parts[1]);

@@ -62,8 +62,7 @@ function openFile($path, $mode){
  */
 function grabDomain($email, $domainCounts){
     $parts = explode("@", strtolower(trim($email)));
-    $parts_count = count($parts);
-    if ($parts_count == 2){
+    if (count($parts) == 2){
         $domain = $parts[1];
         if (array_key_exists ($domain  , $domainCounts )){
             $count = $domainCounts[$domain];
@@ -137,8 +136,7 @@ function readEmails(){
 function grabTopLevel($line, $topLevelCounts)
 {
     $parts = explode("  ", trim($line));
-    $parts_count = count($parts);
-    if ($parts_count == 2){
+    if (count($parts) == 2){
         $count = $parts[0];
         $domain = $parts[1];
         $checker = new \freegle\DomainChecker\DomainChecker($domain);
@@ -204,9 +202,9 @@ function countTopLevels(){
  * Starts a script file that will hold an array constant
  *
  * @param $path string Path to the script file to start array
- * @param $array_name string Name of the array to start
+ * @param $arrayName string Name of the array to start
  */
-function arrayFileHeader($path, $array_name){
+function arrayFileHeader($path, $arrayName){
     $file = openFile($path, "w");
     fwrite($file, "<?php\n\n");
     fwrite($file, "namespace freegle\\" . substr($path, 0, -4) . ";\n\n");
@@ -214,7 +212,7 @@ function arrayFileHeader($path, $array_name){
     fwrite($file, " *Automatically generated file.\n");
     fwrite($file, " *Generated using DataCreator.php\n");
     fwrite($file, " */\n\n");
-    fwrite($file, "const " . $array_name . " = array(\n");
+    fwrite($file, "const " . $arrayName . " = array(\n");
     fclose($file);
 }
 
@@ -274,8 +272,8 @@ function tailsForLevelDomains(){
  */
 function grabDomainLine($line, $topLevel, $domainCounts){
     $parts = explode(DATA_DIVIDER, trim($line));
-    $parts_count = count($parts);
-    if ($parts_count == 2){
+    $partsCount = count($parts);
+    if (partsCount == 2){
         $count = $parts[0];
         $domain = $parts[1];
         $checker = new \freegle\DomainChecker\DomainChecker($domain);
@@ -400,8 +398,7 @@ function createDomainFiles(){
     if ($handle) {
         while (($line = fgets($handle)) !== false) {
             $parts = explode(DATA_DIVIDER, trim($line));
-            $parts_count = count($parts);
-            if ($parts_count == 3) {
+            if (count($parts) == 3) {
                 $count = $parts[0];
                 $topLevel = $parts[1];
                 echo $topLevel . " " . $count . "\n";
@@ -427,8 +424,7 @@ function countDomainsPerTopLevel()
         $count = 0;
         while (($line = fgets($handle)) !== false) {
             $info = explode(",  ", trim($line));
-            $info_count = count($info);
-            if ($info_count != 2) {
+            if (count($info) != 2) {
                 #echo $line;
             } else {
                 $domain = $info[1];
@@ -510,8 +506,7 @@ function findExtraDepths()
         $partsCounts = array();
         while (($line = fgets($handle)) !== false) {
             $info = explode(",  ", trim($line));
-            $info_count = count($info);
-            if ($info_count == 2) {
+            if (count($info) == 2) {
                 $domain = $info[1];
                 $checker = new \freegle\DomainChecker\DomainChecker($domain);
                 if ($topLevel != $checker->getTopLevel()) {
@@ -547,8 +542,7 @@ function findExtraDepths()
  */
 function findExtra($domain, $extraDepth, $extras){
     $parts = explode(".", trim($domain));
-    $count = count($parts);
-    if ($count == $extraDepth) {
+    if (count($parts) == $extraDepth) {
         if (array_key_exists ($parts[1] , $extras )) {
             $domainsCount = $extras[$parts[1]] + 1;
         } else {
@@ -656,8 +650,7 @@ function findAllExtras()
         $topLevel = "";
         while (($line = fgets($handle)) !== false) {
             $info = explode(",  ", trim($line));
-            $info_count = count($info);
-            if ($info_count == 2) {
+            if (count($info) == 2) {
                 $domain = $info[1];
                 $checker = new \freegle\DomainChecker\DomainChecker($domain);
                 if ($topLevel != $checker->getTopLevel()) {

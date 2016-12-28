@@ -12,9 +12,9 @@ const MAX_TOLERANCE = 3;
 
 class DomainRecommender extends \freegle\DomainChecker\DomainChecker
 {
-    private $recommended_domain;
+    private $recommendedDomain;
 
-    private $all_recommendations;
+    private $allRecommendations;
 
     public function isKnown()
     {
@@ -96,21 +96,21 @@ class DomainRecommender extends \freegle\DomainChecker\DomainChecker
      */
     public function getRecommendedDomain()
     {
-        if (!isset($this->recommended_domain)) {
+        if (!isset($this->recommendedDomain)) {
             if ($this->isKnown()){
-                $this->recommended_domain = $this->original_domain;
+                $this->recommendedDomain = $this->originalDomain;
             } else {
-                $min_difference = PHP_INT_MAX;
-                $this->recommended_domain = false; #false if none found
+                $minDifference = PHP_INT_MAX;
+                $this->recommendedDomain = false; #false if none found
                 foreach($this->getAllRecommendations() as $recommendation => $difference){
-                     if ($difference < $min_difference){
-                        $this->recommended_domain = $recommendation;
-                        $min_difference = $difference;
+                     if ($difference < $minDifference){
+                        $this->recommendedDomain = $recommendation;
+                        $minDifference = $difference;
                     }
                 }
             }
         }
-        return $this->recommended_domain;
+        return $this->recommendedDomain;
     }
 
     /**
@@ -118,10 +118,10 @@ class DomainRecommender extends \freegle\DomainChecker\DomainChecker
      */
     public function getAllRecommendations()
     {
-        if (!isset($this->all_recommendations)) {
-            $this->all_recommendations = $this->findAllRecommendedDomains(trim($this->lowerCaseDoamin), MAX_TOLERANCE);
+        if (!isset($this->allRecommendations)) {
+            $this->allRecommendations = $this->findAllRecommendedDomains(trim($this->lowerCaseDoamin), MAX_TOLERANCE);
         }
-        return $this->all_recommendations;
+        return $this->allRecommendations;
     }
 
 }

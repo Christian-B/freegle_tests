@@ -47,6 +47,16 @@ class EmailRecommendeTest extends PHPUnit_Framework_TestCase
         $this->verifyChecker("PETER@yaPoo.co.UK", false,"peter@yahoo.co.uk");
     }
 
+    public function testYapooCoUkWhiteSpaceBefore()
+    {
+        $this->verifyChecker("\tpul@yapoo.co.uk ", false, "pul@yahoo.co.uk");
+    }
+
+    public function testYapooCoUkWhiteSpaceMiddle()
+    {
+        $this->verifyChecker("John@ yapoo.co.uk", false, "john@yahoo.co.uk");
+    }
+
     public function testYapooCoUkWhiteSpace()
     {
         $this->verifyChecker("\tpul@yapoo.co.uk ", false, "pul@yahoo.co.uk");
@@ -70,6 +80,11 @@ class EmailRecommendeTest extends PHPUnit_Framework_TestCase
     public function testBad()
     {
         $this->verifyChecker("mark@thisDomainisNotKnown.co.uk", false, false);
+    }
+
+    public function testNoAtYahooCoUk()
+    {
+        $this->verifyChecker("member1yahoo.co.uk", false, "member1@yahoo.co.uk");
     }
 
 }

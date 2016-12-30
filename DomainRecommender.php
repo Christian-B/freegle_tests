@@ -124,4 +124,34 @@ class DomainRecommender extends \freegle\DomainChecker\DomainChecker
         return $this->allRecommendations;
     }
 
+    function endsWith($haystack, $needle ) {
+        return ( substr( $haystack, strlen( $haystack ) - strlen( $needle ) ) === $needle );
+    }
+
+    private function findKnownEndings($long)
+    {
+        $knownEndings = array();
+        $topLevel = $this->findTopLevel($long);
+        if (array_key_exists($topLevel, \freegle\CommonDomains\DOMAINS)) {
+            foreach (\freegle\CommonDomains\DOMAINS[$topLevel] as $known) {
+                if ($this->endsWith($long, $known)) {
+                    $knownEndings[] = $known;
+                }
+            }
+        }
+        return $knownEndings;
+    }
+
+    public function bestKnownEnding()
+    {
+        $maxDifference = 0;
+        $knownEnding = false; #false if none found
+        foreach($this->findKnownEndings($this->lowerCaseDoamin) as $ending){
+            if (strlen($ending) > $maxDifference){
+                $knownEnding  = $ending;
+                $maxDifference = strlen($ending);
+            }
+        }
+        return $knownEnding;
+    }
 }

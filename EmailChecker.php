@@ -25,7 +25,7 @@ class EmailChecker
      *
      * @var String
      */
-    private $cleanEmail;
+    protected $cleanEmail;
 
     private $orignalError;
 
